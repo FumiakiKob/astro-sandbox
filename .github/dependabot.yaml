@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily" # 毎日チェックします
+    ignore:
+      - dependency-name: "*"
+        min-release-age: 7 # サプライチェーン攻撃対策：リリース後7日間は更新を無視（保留）します
