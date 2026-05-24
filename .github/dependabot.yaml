@@ -6,3 +6,9 @@ updates:
       interval: "daily" # 毎日チェックします
     cooldown:
       default-days: 7 # サプライチェーン攻撃対策：リリース後7日間は更新を保留（クールダウン）します
+  - package-ecosystem: "github-actions"
+    directory: "/" # .github/workflowsがある場所
+    schedule:
+      interval: "daily" # チェックする頻度（daily, weekly, monthly）
+    cooldown:
+      default-days: 7 # サプライチェーン攻撃対策：リリース後7日間は更新を保留（クールダウン）します
