@@ -1,0 +1,70 @@
+---
+// src/pages/atcoder/[id].astro
+
+export async function getStaticPaths() {
+  // 💡 `src/atcoder/` 以下のすべての .ts ファイルを自動で一括取得するよ！
+  const modules = import.meta.glob('../../atcoder/*.ts');
+
+  const paths = await Promise.all(
+    Object.keys(modules).map(async (path) => {
+      // ファイルパス（例: ../../atcoder/abc350_a.ts）からファイル名（abc350_a）を抽出
+      const id = path.split('/').pop()?.replace('.ts', '') || '';
+      
+      // ファイルの中身を動的にインポート
+      const problem = await modules[path]() as any;
+
+      return {
+        params: { id },
+        props: { problem },
+      };
+    })
+  );
+
+  return paths;
+}
+
+const { id } = Astro.params;
+const { problem } = Astro.props;
+
+const results = problem.testCases.map((tc: any) => {
+  const actual = problem.solve(tc.input);
+  return {
+    ...tc,
+    actual,
+    isCorrect: actual === tc.expected
+  };
+});
+---
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>{problem.title} - 練習場</title>
+  </head>
+  <body style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+    <a href="/">← トップへ戻る</a>
+    <h1>{problem.title} ({id})</h1>
+
+    <h3>テストケース実行結果</h3>
+    {results.map((res: any, index: number) => (
+      <div style="padding: 15px; border: 1px solid #ccc; margin-bottom: 10px; background: #f9f9f9;">
+        <h4>ケース {index + 1}</h4>
+        
+        <p><strong>入力:</strong></p>
+        <pre style="background: #23241f; color: #f8f8f2; padding: 10px; border-radius: 4px; font-family: monospace;">{res.input}</pre>
+        
+        <p><strong>期待:</strong></p>
+        <pre style="background: #23241f; color: #f8f8f2; padding: 10px; border-radius: 4px; font-family: monospace;">{res.expected}</pre>
+        
+        <p><strong>出力:</strong></p>
+        <pre style="background: #23241f; color: #f8f8f2; padding: 10px; border-radius: 4px; font-family: monospace;">{res.actual}</pre>
+        
+        <p><strong>判定:</strong> 
+          <span style={`color: ${res.isCorrect ? 'green' : 'red'}; font-weight: bold;`}>
+            {res.isCorrect ? 'AC' : 'WA'}
+          </span>
+        </p>
+      </div>
+    ))}
+  </body>
+</html>
