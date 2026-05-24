@@ -3,11 +3,12 @@ name: Lint and Check
 on:
   pull_request:
     branches:
-      - main # もしくは対象とするデフォルトブランチ名（masterなど）
+      - main
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -16,11 +17,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22 # package.jsonの指定（>=22.12.0）に合わせてNode.jsのバージョンを設定します
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run Linter
-        run: npm run lint
+        run: npm run lint              # astro check での型チェック
+
+      - name: Build Project            # Webページとしてビルドできるか検証
+        run: npm run build

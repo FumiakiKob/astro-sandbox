@@ -1,11 +1,45 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
+// src/pages/index.astro
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// 💡 ここでもファイルを自動スキャン！
+const modules = import.meta.glob('../atcoder/*.ts');
+
+const problems = await Promise.all(
+  Object.keys(modules).map(async (path) => {
+    const id = path.split('/').pop()?.replace('.ts', '') || '';
+    const mod = await modules[path]() as any;
+    return {
+      id,
+      title: mod.title,
+    };
+  })
+);
 ---
 
-<Layout>
-  <Welcome />
-</Layout>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>Astro AtCoder Sandbox</title>
+  </head>
+  <body style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h1>AtCoder TypeScript 練習場</h1>
+    <p>新しく <code>src/atcoder/</code> にファイルを追加すると、ここに自動で並ぶよ！</p>
+
+    <hr />
+
+    <h2>問題一覧</h2>
+    {problems.length === 0 ? (
+      <p>まだ問題がありません。ファイルを置いてみてね！</p>
+    ) : (
+      <ul>
+        {problems.map((prob) => (
+          <li style="margin: 10px 0;">
+            <a href={`/atcoder/${prob.id}`} style="font-size: 1.2rem; color: #007acc; text-decoration: none;">
+              <strong>{prob.title}</strong> <span style="color: #666; font-size: 0.9rem;">({prob.id})</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </body>
+</html>
